@@ -1,0 +1,184 @@
+{
+  "info": {
+    "_postman_id": "c1f73602-0941-412f-b441-2b6279f5f0b5",
+    "name": "TaskFlow - Task Management REST API",
+    "description": "Postman Collection for TaskFlow REST API with in-memory persistence.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5001",
+      "type": "string"
+    },
+    {
+      "key": "taskId",
+      "value": "task-1001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "health"]
+        },
+        "description": "Check backend health and uptime"
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Tasks",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/tasks?search=&status=all&priority=all&sortBy=createdAt&sortOrder=desc&page=1&limit=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tasks"],
+          "query": [
+            { "key": "search", "value": "" },
+            { "key": "status", "value": "all" },
+            { "key": "priority", "value": "all" },
+            { "key": "sortBy", "value": "createdAt" },
+            { "key": "sortOrder", "value": "desc" },
+            { "key": "page", "value": "1" },
+            { "key": "limit", "value": "10" }
+          ]
+        },
+        "description": "Retrieve tasks with optional search query, status/priority filtering, sorting, and pagination"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Task Stats",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/tasks/stats",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tasks", "stats"]
+        },
+        "description": "Retrieve aggregate counters for total, pending, in-progress, completed, and high-priority tasks"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Single Task by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/tasks/{{taskId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tasks", "{{taskId}}"]
+        },
+        "description": "Fetch complete details of an individual task"
+      },
+      "response": []
+    },
+    {
+      "name": "Create Task - Valid (201 Created)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Complete assignment\",\n  \"description\": \"Build the full-stack task manager\",\n  \"status\": \"pending\",\n  \"priority\": \"high\",\n  \"dueDate\": \"2026-10-25\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/tasks",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tasks"]
+        },
+        "description": "Create a new task with valid title and description"
+      },
+      "response": []
+    },
+    {
+      "name": "Create Task - Validation Error (400 Bad Request)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"\",\n  \"description\": \"\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/tasks",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tasks"]
+        },
+        "description": "Demonstrates 400 Bad Request error handling when required fields are missing"
+      },
+      "response": []
+    },
+    {
+      "name": "Update Task (200 OK)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"completed\",\n  \"priority\": \"high\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/tasks/{{taskId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tasks", "{{taskId}}"]
+        },
+        "description": "Update task fields"
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Task (200 OK)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/tasks/{{taskId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tasks", "{{taskId}}"]
+        },
+        "description": "Delete a task by ID"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Non-Existent Task (404 Not Found)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/tasks/non-existent-id-99999",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tasks", "non-existent-id-99999"]
+        },
+        "description": "Demonstrates 404 Not Found error handling"
+      },
+      "response": []
+    }
+  ]
+}

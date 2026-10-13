@@ -1,0 +1,358 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Task Management System REST API",
+    "description": "Interactive REST API documentation for the Task Management System with in-memory persistence.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Engineering Team"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5001",
+      "description": "Local development server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Tasks",
+      "description": "Operations on tasks"
+    }
+  ],
+  "paths": {
+    "/api/tasks": {
+      "get": {
+        "tags": ["Tasks"],
+        "summary": "Get all tasks",
+        "description": "Retrieve tasks with optional search, status/priority filtering, sorting, and pagination.",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search term matching title or description",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status: pending, in_progress, completed",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["all", "pending", "in_progress", "completed"]
+            }
+          },
+          {
+            "name": "priority",
+            "in": "query",
+            "description": "Filter by priority: low, medium, high",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["all", "low", "medium", "high"]
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Field to sort by",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["createdAt", "priority", "dueDate", "title"],
+              "default": "createdAt"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "Sort direction",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (1-based)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of tasks retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Tasks"],
+        "summary": "Create a new task",
+        "description": "Creates a task in backend in-memory storage.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleTaskResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error (e.g. missing title/description)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tasks/stats": {
+      "get": {
+        "tags": ["Tasks"],
+        "summary": "Get aggregate task statistics",
+        "description": "Retrieve counts for total, pending, in-progress, completed, and high priority tasks.",
+        "responses": {
+          "200": {
+            "description": "Statistics retrieved successfully"
+          }
+        }
+      }
+    },
+    "/api/tasks/{id}": {
+      "get": {
+        "tags": ["Tasks"],
+        "summary": "Get a single task by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleTaskResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Tasks"],
+        "summary": "Update an existing task",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Task updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleTaskResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "404": {
+            "description": "Task not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Tasks"],
+        "summary": "Delete a task by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task deleted successfully"
+          },
+          "404": {
+            "description": "Task not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Task": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "task-1001" },
+          "title": { "type": "string", "example": "Build full-stack task manager" },
+          "description": { "type": "string", "example": "Develop responsive UI and REST backend" },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "in_progress", "completed"],
+            "example": "in_progress"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["low", "medium", "high"],
+            "example": "high"
+          },
+          "dueDate": { "type": "string", "format": "date", "example": "2026-10-18" },
+          "createdAt": { "type": "string", "format": "date-time", "example": "2026-10-11T08:30:00.000Z" },
+          "updatedAt": { "type": "string", "format": "date-time", "example": "2026-10-12T14:00:00.000Z" }
+        }
+      },
+      "CreateTaskRequest": {
+        "type": "object",
+        "required": ["title", "description"],
+        "properties": {
+          "title": { "type": "string", "example": "Complete assignment" },
+          "description": { "type": "string", "example": "Build the full-stack task manager" },
+          "status": { "type": "string", "enum": ["pending", "in_progress", "completed"], "default": "pending" },
+          "priority": { "type": "string", "enum": ["low", "medium", "high"], "default": "medium" },
+          "dueDate": { "type": "string", "format": "date", "example": "2026-10-25" }
+        }
+      },
+      "UpdateTaskRequest": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "in_progress", "completed"] },
+          "priority": { "type": "string", "enum": ["low", "medium", "high"] },
+          "dueDate": { "type": "string", "format": "date" }
+        }
+      },
+      "TaskListResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Task" }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "total": { "type": "integer", "example": 5 },
+              "page": { "type": "integer", "example": 1 },
+              "limit": { "type": "integer", "example": 10 },
+              "totalPages": { "type": "integer", "example": 1 }
+            }
+          }
+        }
+      },
+      "SingleTaskResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "Task retrieved successfully" },
+          "data": { "$ref": "#/components/schemas/Task" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string", "example": "Validation failed" },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": { "type": "string" },
+                "message": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
